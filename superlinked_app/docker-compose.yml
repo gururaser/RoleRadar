@@ -1,0 +1,54 @@
+services:
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: cinelinked_qdrant
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC API (optional)
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT_SERVICE_GRPC_PORT=6334
+    networks:
+      - roleradar_network
+    restart: unless-stopped
+    labels:
+      - "project=roleradar"
+      - "service=qdrant"
+
+  # Superlinked Server
+  superlinked:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: roleradar_superlinked
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - roleradar_network
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+    labels:
+      - "project=roleradar"
+      - "service=superlinked"
+    # Wait for backend service to be ready
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  roleradar_network:
+    name: roleradar_network
+
+volumes:
+  qdrant_data:
+    labels:
+      - "project=roleradar"
+      - "service=qdrant"
