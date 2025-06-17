@@ -8,7 +8,10 @@ from superlinked_app.config import settings
 rest_source = sl.RestSource(job_schema)
 
 vector_database = sl.QdrantVectorDatabase(
-    url=settings.qdrant_url, api_key=settings.qdrant_api_key
+    url=settings.qdrant_url, 
+    api_key=settings.qdrant_api_key,
+    #search_algorithm=sl.SearchAlgorithm.HNSW,
+    prefer_grpc=True
 )
 
 config = sl.DataLoaderConfig(
