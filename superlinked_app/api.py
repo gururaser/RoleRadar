@@ -15,7 +15,7 @@ config = sl.DataLoaderConfig(
     path=settings.path_dataset,
     format=sl.DataFormat.CSV,
     name="job_postings",
-    pandas_read_kwargs={"lines": True, "chunksize": settings.chunk_size},
+    pandas_read_kwargs={"chunksize": settings.chunk_size},
 )
 loader_source = sl.DataLoaderSource(job_schema, config)
 

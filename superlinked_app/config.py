@@ -11,10 +11,10 @@ class Settings(BaseSettings):
 
     # Embedding settings
     text_embedder_name: str = "sentence-transformers/all-mpnet-base-v2"
-    chunk_size: int = 1000
+    chunk_size: int = 10000
 
     # Path to the dataset
-    path_dataset: str = "data/job_postings.csv"
+    path_dataset: str = "data/postings.csv"
     path_categories: str = "data/low_cardinality_categories.json"
     
     # OpenAI for Natural Language Query

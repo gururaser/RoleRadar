@@ -10,24 +10,24 @@ class JobPosting:
     
     # The fields below are embedded into spaces
     # and used for semantic search
-    title: sl.String              # Job title
-    description: sl.String        # Job description - most important field
-    company_name: sl.String       # Company name
+    title: sl.String              # Job title (0% missing - required)
+    description: sl.String | None        # Job description (0.01% missing)
+    company_name: sl.String | None       # Company name (1.39% missing)
     
     # Numerical fields - for embedding
-    normalized_salary: sl.Float   # Normalized salary
-    views: sl.Float               # View count
-    applies: sl.Float             # Application count
+    normalized_salary: sl.Float | None   # Normalized salary (70.87% missing)
+    views: sl.Float | None               # View count (1.36% missing)
+    applies: sl.Float | None             # Application count (81.17% missing)
     
     # Categorical fields - for hard filtering
-    location: sl.String           # Location
-    formatted_work_type: sl.String # Work type (remote, hybrid, etc.)
-    formatted_experience_level: sl.String # Experience level
-    work_type: sl.String          # Job type
-    pay_period: sl.String         # Pay period
-    currency: sl.String           # Currency
-    compensation_type: sl.String  # Compensation type
-    remote_allowed: sl.Float      # Remote work allowed (0/1)
+    location: sl.String | None           # Location (may have missing values)
+    formatted_work_type: sl.String | None # Work type (may have missing values)
+    formatted_experience_level: sl.String | None # Experience level (23.75% missing)
+    work_type: sl.String | None          # Job type (may have missing values)
+    pay_period: sl.String | None         # Pay period (70.87% missing)
+    currency: sl.String | None           # Currency (70.87% missing)
+    compensation_type: sl.String | None  # Compensation type (70.87% missing)
+    remote_allowed: sl.Float | None      # Remote work allowed (87.69% missing)
 
 
 job_schema = JobPosting()
