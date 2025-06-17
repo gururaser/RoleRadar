@@ -1,6 +1,4 @@
 import json
-import urllib.request
-import os
 from pathlib import Path
 
 from superlinked import framework as sl
