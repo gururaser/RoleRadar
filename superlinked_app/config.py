@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """Configuration settings for the Superlinked application."""
 
     # Embedding settings
-    text_embedder_name: str = "sentence-transformers/all-mpnet-base-v2"
+    text_embedder_name: str = "Qwen/Qwen3-Embedding-0.6B"
     chunk_size: int = 10000
 
     # Path to the dataset
