@@ -21,6 +21,8 @@ COPY . ./superlinked_app
 # Set Python path and application module path environment variables
 ENV PYTHONPATH=/app
 ENV APP_MODULE_PATH=superlinked_app
+ENV GPU_EMBEDDING_THRESHOLD=1
+#ENV WORKER_COUNT=10
 
 # Expose port 8080 for Superlinked server
 EXPOSE 8080
