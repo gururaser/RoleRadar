@@ -109,7 +109,6 @@ install:
 				\"on_disk_payload\": true, \
 				\"vectors\": { \
 					\"$$VECTOR_NAME\": { \
-						\"on_disk\": true, \
 						\"datatype\": \"float16\" \
 					} \
 				}, \
