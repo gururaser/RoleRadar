@@ -37,6 +37,9 @@ class JobPosting:
     job_type: sl.String | None        # Job type (Onsite, Remote, Hybrid)
     job_category: sl.String | None    # Job category (data_analyst, data_engineer, etc.)
 
+    # Job link
+    job_link: sl.String | None 
+
 
 job_schema = JobPosting()
 
@@ -77,5 +80,6 @@ index = sl.Index(
         job_schema.job_type,            # Work type (Onsite, Remote, Hybrid)
         job_schema.job_category,        # Job category (data_analyst, etc.)
         job_schema.company,             # Company name
+        job_schema.job_link,            # Job link
     ],
 )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, MapPin, Clock, Building, DollarSign, Users, Filter, Sparkles } from 'lucide-react'
+import { Search, MapPin, Clock, Building, DollarSign, Users, Filter, Sparkles, X, ExternalLink, Calendar, Globe } from 'lucide-react'
 
 interface JobResult {
   id: string
@@ -16,6 +16,7 @@ interface JobResult {
     job_level: string
     job_type: string
     job_category: string
+    job_link?: string
   }
   metadata: {
     score: number
@@ -37,6 +38,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
   const [error, setError] = useState('')
+  const [selectedJob, setSelectedJob] = useState<JobResult | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,6 +96,16 @@ export default function HomePage() {
       case 'onsite': return 'bg-red-900 text-red-200'
       default: return 'bg-gray-700 text-gray-200'
     }
+  }
+
+  const handleViewDetails = (job: JobResult) => {
+    setSelectedJob(job)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedJob(null)
   }
 
   return (
@@ -292,7 +305,10 @@ export default function HomePage() {
                     <div className="flex items-center space-x-4 text-sm text-gray-300">
                       <span className="capitalize">{job.fields.job_category.replace('_', ' ')}</span>
                     </div>
-                    <button className="btn-primary">
+                    <button 
+                      className="btn-primary"
+                      onClick={() => handleViewDetails(job)}
+                    >
                       View Details
                     </button>
                   </div>
@@ -302,6 +318,144 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {/* Job Details Modal */}
+      {isModalOpen && selectedJob && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-start p-6 border-b border-gray-700">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-100 mb-2">
+                  {selectedJob.fields.job_title}
+                </h2>
+                <div className="flex items-center space-x-4 text-gray-300">
+                  <div className="flex items-center space-x-1">
+                    <Building className="w-4 h-4" />
+                    <span>{selectedJob.fields.company}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <MapPin className="w-4 h-4" />
+                    <span>{selectedJob.fields.job_location}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Globe className="w-4 h-4" />
+                    <span>{selectedJob.fields.job_type}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={closeModal}
+                className="ml-4 p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Job Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Job Level</div>
+                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getJobLevelColor(selectedJob.fields.job_level)}`}>
+                    {selectedJob.fields.job_level}
+                  </div>
+                </div>
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Work Type</div>
+                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getJobTypeColor(selectedJob.fields.job_type)}`}>
+                    {selectedJob.fields.job_type}
+                  </div>
+                </div>
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Match Score</div>
+                  <div className="text-lg font-semibold text-primary-400">
+                    {Math.round(selectedJob.metadata.score * 100)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Job Category */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-100 mb-3">Category</h3>
+                <span className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm capitalize">
+                  {selectedJob.fields.job_category.replace('_', ' ')}
+                </span>
+              </div>
+
+              {/* Job Description */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-100 mb-3">Job Description</h3>
+                <div className="bg-gray-900 rounded-lg p-4">
+                  <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {selectedJob.fields.job_summary}
+                  </div>
+                </div>
+              </div>
+
+              {/* Required Skills */}
+              {selectedJob.fields.job_skills && selectedJob.fields.job_skills.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-100 mb-3">Required Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {formatSkills(selectedJob.fields.job_skills).map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-2 bg-primary-900 text-primary-200 rounded-lg text-sm font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Location Details */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-100 mb-3">Location Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-900 rounded-lg p-4">
+                    <div className="text-sm text-gray-400 mb-1">Full Location</div>
+                    <div className="text-gray-100">{selectedJob.fields.job_location}</div>
+                  </div>
+                  {selectedJob.fields.state && (
+                    <div className="bg-gray-900 rounded-lg p-4">
+                      <div className="text-sm text-gray-400 mb-1">State</div>
+                      <div className="text-gray-100">{selectedJob.fields.state}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-4 pt-6 border-t border-gray-700">
+                <button
+                  onClick={closeModal}
+                  className="btn-secondary flex-1"
+                >
+                  Close
+                </button>
+                <button
+                  className="btn-primary flex-1 flex items-center justify-center space-x-2"
+                  onClick={() => {
+                    const jobLink = selectedJob.fields.job_link
+                    if (jobLink && jobLink.trim()) {
+                      window.open(jobLink, '_blank')
+                    } else {
+                      // Fallback to Google search if job_link is not available
+                      window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedJob.fields.job_title + ' ' + selectedJob.fields.company)}`, '_blank')
+                    }
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Apply Now</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-800 border-t border-gray-700 mt-16">
