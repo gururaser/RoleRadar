@@ -4,11 +4,6 @@ export default function LoadingAnimation() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="text-center py-16">
-        <div className="inline-flex items-center justify-center space-x-2 mb-6">
-          <div className="w-3 h-3 bg-primary-500 rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-primary-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-          <div className="w-3 h-3 bg-primary-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-        </div>
         <div className="relative">
           <div className="w-24 h-24 border-4 border-gray-700 border-t-primary-500 rounded-full animate-spin mx-auto mb-4"></div>
           <div className="absolute inset-0 flex items-center justify-center">

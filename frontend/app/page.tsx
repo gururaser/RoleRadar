@@ -19,6 +19,12 @@ export default function HomePage() {
   const [selectedJob, setSelectedJob] = useState<JobResult | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const handleQueryClear = () => {
+    setResults([])
+    setHasSearched(false)
+    setError('')
+  }
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim()) return
@@ -74,6 +80,7 @@ export default function HomePage() {
           onSearch={handleSearch}
           isLoading={isLoading}
           hasSearched={hasSearched}
+          onQueryClear={handleQueryClear}
         />
 
         {/* Error Message */}

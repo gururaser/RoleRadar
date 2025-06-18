@@ -6,15 +6,24 @@ interface SearchSectionProps {
   onSearch: (e: React.FormEvent) => void
   isLoading: boolean
   hasSearched: boolean
+  onQueryClear?: () => void
 }
 
-export default function SearchSection({ query, setQuery, onSearch, isLoading, hasSearched }: SearchSectionProps) {
+export default function SearchSection({ query, setQuery, onSearch, isLoading, hasSearched, onQueryClear }: SearchSectionProps) {
   const exampleQueries = [
     "Data Scientist jobs in San Francisco with Python and ML",
     "Remote Software Engineer positions with React",
     "Data Analyst roles in New York with SQL experience",
     "Senior Data Engineer jobs in Seattle"
   ]
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value)
+    // Eğer metin boşsa ve daha önce arama yapılmışsa ana sayfaya dön
+    if (value === '' && hasSearched && onQueryClear) {
+      onQueryClear()
+    }
+  }
 
   return (
     <>
@@ -39,7 +48,7 @@ export default function SearchSection({ query, setQuery, onSearch, isLoading, ha
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="e.g., Data Analyst jobs in California with SQL and Python experience..."
               className="w-full pl-12 pr-32 py-4 text-lg border border-gray-600 bg-gray-800 text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 shadow-sm placeholder-gray-400"
               disabled={isLoading}
