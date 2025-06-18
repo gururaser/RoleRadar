@@ -1,20 +1,72 @@
 # RoleRadar Makefile
 # English Makefile for RoleRadar project
 
-.PHONY: help install run stop clean logs status
+.PHONY: help install basic-install run stop clean logs status
 
 # Default target
 help:
 	@echo "RoleRadar - Available commands:"
-	@echo "  install    - Install and setup the entire system"
-	@echo "  run        - Start all services"
-	@echo "  stop       - Stop all services"
-	@echo "  clean      - Stop services and remove containers/volumes"
-	@echo "  logs       - Show logs from all services"
-	@echo "  status     - Check service status"
-	@echo "  help       - Show this help message"
+	@echo "  install       - Install and setup the entire system (with optimization)"
+	@echo "  basic-install - Basic install with data loading only"
+	@echo "  run           - Start all services"
+	@echo "  stop          - Stop all services"
+	@echo "  clean         - Stop services and remove containers/volumes"
+	@echo "  logs          - Show logs from all services"
+	@echo "  status        - Check service status"
+	@echo "  help          - Show this help message"
 
-# Install and setup the system
+# Basic install - only start services and load data
+basic-install:
+	@echo "🚀 Starting basic RoleRadar installation..."
+	@cd superlinked_app && docker-compose up -d --build --force-recreate --no-deps
+	@echo "⏳ Waiting 30 seconds for services to start..."
+	@sleep 30
+	@echo "🔍 Checking if Qdrant collection exists..."
+	@until curl -s http://localhost:6333/collections/default/exists 2>/dev/null | jq -e '.result.exists == true' >/dev/null 2>&1; do \
+		echo "Waiting for collection to be available..."; \
+		sleep 5; \
+	done
+	@echo "✅ Collection exists, starting data loading..."
+	@echo "📊 Getting data loader configuration..."
+	@RETRY_COUNT=0; \
+	while [ $$RETRY_COUNT -lt 10 ]; do \
+		DATA_LOADER_RESPONSE=$$(curl -s http://localhost:8080/data-loader/ 2>/dev/null); \
+		if [ -n "$$DATA_LOADER_RESPONSE" ] && echo "$$DATA_LOADER_RESPONSE" | jq -e '.result' >/dev/null 2>&1; then \
+			DATA_LOADER_NAME=$$(echo "$$DATA_LOADER_RESPONSE" | jq -r '.result | keys[0]'); \
+			if [ -n "$$DATA_LOADER_NAME" ] && [ "$$DATA_LOADER_NAME" != "null" ]; then \
+				echo "📝 Found data loader name: $$DATA_LOADER_NAME"; \
+				break; \
+			fi; \
+		fi; \
+		RETRY_COUNT=$$((RETRY_COUNT + 1)); \
+		echo "Retry $$RETRY_COUNT/10: Getting data loader configuration..."; \
+		sleep 3; \
+	done; \
+	if [ $$RETRY_COUNT -eq 10 ]; then \
+		echo "❌ Failed to get data loader configuration after 10 attempts"; \
+		exit 1; \
+	fi; \
+	echo "🔄 Starting data loading process..."; \
+	RETRY_COUNT=0; \
+	while [ $$RETRY_COUNT -lt 10 ]; do \
+		LOAD_RESULT=$$(curl -s -X POST http://localhost:8080/data-loader/$$DATA_LOADER_NAME/run 2>/dev/null); \
+		if [ -n "$$LOAD_RESULT" ] && ! echo "$$LOAD_RESULT" | grep -q "Not Found"; then \
+			echo "✅ Data loading started successfully"; \
+			break; \
+		fi; \
+		RETRY_COUNT=$$((RETRY_COUNT + 1)); \
+		echo "Retry $$RETRY_COUNT/10: Starting data loading..."; \
+		sleep 3; \
+	done; \
+	if [ $$RETRY_COUNT -eq 10 ]; then \
+		echo "❌ Failed to start data loading after 10 attempts"; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "🎉 Basic installation completed successfully!"
+	@echo "📊 System is ready to use."
+
+# Install and setup the entire system with optimization
 install:
 	@echo "🚀 Starting RoleRadar installation..."
 	@cd superlinked_app && docker-compose up -d --build --force-recreate --no-deps
