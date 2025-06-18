@@ -1,7 +1,6 @@
 from superlinked import framework as sl
 
 from superlinked_app.config import settings
-from superlinked_app.index import load_categories
 
 openai_config = sl.OpenAIClientConfig(
     api_key=settings.openai_api_key.get_secret_value(),
@@ -115,6 +114,12 @@ skills_description = (
 system_prompt = (
     "Extract the job search parameters from the user query based on real job posting data.\n"
     "Guidelines based on actual dataset patterns:\n\n"
+    "**FILTERING LOGIC PRINCIPLES**\n"
+    "- Use 'include' filters only when specific items are explicitly mentioned for inclusion\n"
+    "- Use 'exclude' filters when items should be specifically excluded\n"
+    "- When query says 'in [country] but not [state/city]', use country_include + state/city_exclude\n"
+    "- Do NOT populate include filters with assumptions - only with explicitly mentioned items\n"
+    "- Let broader filters (country) handle inclusion, use specific filters (state/city) for exclusion\n\n"
     "**IMPORTANT: Country/Location Filtering**\n"
     "When a country is mentioned (UK, United Kingdom, US, United States, Canada, Australia), "
     "ALWAYS set the 'search_countries_include' parameter with the proper country name.\n"
@@ -140,7 +145,13 @@ system_prompt = (
     "When specific cities are mentioned (San Francisco, New York, London, Toronto, etc.), "
     "add them to the appropriate city filter.\n\n"
     "**'states_include' field**\n"
-    "When US states are mentioned, use standard abbreviations: CA, TX, FL, NY, IL, etc.\n\n"
+    "When specific US states are explicitly mentioned for inclusion, use standard abbreviations: CA, TX, FL, NY, IL, etc.\n"
+    "IMPORTANT: If the query says 'in USA but not in [state]' or 'except [state]', do NOT populate states_include.\n"
+    "Only use states_exclude for the excluded states. Let the country filter handle the rest.\n"
+    "Examples:\n"
+    "- 'jobs in California and Texas' -> states_include: ['CA', 'TX']\n"
+    "- 'jobs in USA but not California' -> states_include: None, states_exclude: ['CA']\n"
+    "- 'jobs in USA except NY and CA' -> states_include: None, states_exclude: ['NY', 'CA']\n\n"
     "**'companies_include' field**\n"
     "When specific company names are mentioned, add them to this filter.\n\n"
     "**'job_levels_include' field**\n"

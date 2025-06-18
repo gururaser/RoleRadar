@@ -71,35 +71,20 @@ CategoryFilter = namedtuple(
 
 filters = [
     # Job location filters - dynamic values (many unique locations)
-    CategoryFilter(
-        operator=job_schema.job_location.in_,
-        param_name="job_locations_include",
-        field_name="job_location",
-        description=location_description + " Job locations that should be included.",
-        options=job_categories.get("job_location", []),
-    ),
-    CategoryFilter(
-        operator=job_schema.job_location.not_in_,
-        param_name="job_locations_exclude",
-        field_name="job_location",
-        description=location_description + " Job locations that should be excluded.",
-        options=job_categories.get("job_location", []),
-    ),
-    # City filters - dynamic values (many unique cities)
-    CategoryFilter(
-        operator=job_schema.city.in_,
-        param_name="cities_include",
-        field_name="city",
-        description="Cities that should be included.",
-        options=job_categories.get("city", []),
-    ),
-    CategoryFilter(
-        operator=job_schema.city.not_in_,
-        param_name="cities_exclude",
-        field_name="city",
-        description="Cities that should be excluded.",
-        options=job_categories.get("city", []),
-    ),
+    # CategoryFilter(
+    #     operator=job_schema.job_location.in_,
+    #     param_name="job_locations_include",
+    #     field_name="job_location",
+    #     description=location_description + " Job locations that should be included.",
+    #     options=job_categories.get("job_location", []),
+    # ),
+    # CategoryFilter(
+    #     operator=job_schema.job_location.not_in_,
+    #     param_name="job_locations_exclude",
+    #     field_name="job_location",
+    #     description=location_description + " Job locations that should be excluded.",
+    #     options=job_categories.get("job_location", []),
+    # ),
     # State filters - available in categories.json
     CategoryFilter(
         operator=job_schema.state.in_,

@@ -144,6 +144,8 @@ export default function HomePage() {
                 placeholder="e.g., Data Analyst jobs in California with SQL and Python experience..."
                 className="w-full pl-12 pr-32 py-4 text-lg border border-gray-600 bg-gray-800 text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 shadow-sm placeholder-gray-400"
                 disabled={isLoading}
+                spellCheck={false}
+                autoComplete="off"
               />
               <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
                 <button

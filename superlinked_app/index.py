@@ -30,7 +30,6 @@ class JobPosting:
     
     # Categorical fields - for hard filtering
     job_location: sl.String | None    # Full job location
-    city: sl.String | None            # Extracted city
     state: sl.String | None           # Extracted state (US)
     search_city: sl.String | None     # Search city used
     search_country: sl.String | None  # Search country used
@@ -71,7 +70,6 @@ index = sl.Index(
     # Users can apply exact filters based on these criteria
     fields=[
         job_schema.job_location,        # Full location filter
-        job_schema.city,                # City filter
         job_schema.state,               # State filter
         job_schema.search_city,         # Search city filter
         job_schema.search_country,      # Search country filter
