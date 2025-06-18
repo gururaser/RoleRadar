@@ -11,15 +11,9 @@ from superlinked_app.index import (
     title_space,
 )
 from superlinked_app.nlq import (
-    company_description,
-    description_description,
-    experience_level_description,
-    location_description,
+    FIELD_DESCRIPTIONS,
     openai_config,
-    skills_description,
     system_prompt,
-    title_description,
-    work_type_description,
 )
 
 job_categories = load_categories()
@@ -40,17 +34,17 @@ query = (
     .find(job_schema)
     .similar(
         description_space.text,
-        sl.Param("description", description=description_description),
+        sl.Param("description", description=FIELD_DESCRIPTIONS["description"]),
         weight=sl.Param("similar_description_weight", default=0.8),
     )
     .similar(
         title_space.text,
-        sl.Param("title", description=title_description),
+        sl.Param("title", description=FIELD_DESCRIPTIONS["title"]),
         weight=sl.Param("similar_title_weight", default=1.0),
     )
     .similar(
         skills_space.category,
-        sl.Param("skills", description=skills_description),
+        sl.Param("skills", description=FIELD_DESCRIPTIONS["skills"]),
         weight=sl.Param("similar_skills_weight", default=0.9),
     )
 )
@@ -70,34 +64,19 @@ CategoryFilter = namedtuple(
 )
 
 filters = [
-    # Job location filters - dynamic values (many unique locations)
-    # CategoryFilter(
-    #     operator=job_schema.job_location.in_,
-    #     param_name="job_locations_include",
-    #     field_name="job_location",
-    #     description=location_description + " Job locations that should be included.",
-    #     options=job_categories.get("job_location", []),
-    # ),
-    # CategoryFilter(
-    #     operator=job_schema.job_location.not_in_,
-    #     param_name="job_locations_exclude",
-    #     field_name="job_location",
-    #     description=location_description + " Job locations that should be excluded.",
-    #     options=job_categories.get("job_location", []),
-    # ),
     # State filters - available in categories.json
     CategoryFilter(
         operator=job_schema.state.in_,
         param_name="states_include",
         field_name="state",
-        description="States that should be included. Available: CA, TX, FL, NY, IL, etc.",
+        description=f"States to include. {FIELD_DESCRIPTIONS['location']} Only include explicitly mentioned states.",
         options=job_categories.get("state", []),
     ),
     CategoryFilter(
         operator=job_schema.state.not_in_,
         param_name="states_exclude",
         field_name="state",
-        description="States that should be excluded.",
+        description=f"States to exclude. {FIELD_DESCRIPTIONS['location']} Use when query mentions 'but not [state]'.",
         options=job_categories.get("state", []),
     ),
     # Search city filters - dynamic values (many unique search cities)
@@ -105,14 +84,14 @@ filters = [
         operator=job_schema.search_city.in_,
         param_name="search_cities_include",
         field_name="search_city",
-        description="Search cities that should be included.",
+        description=f"Cities to include. {FIELD_DESCRIPTIONS['location']}",
         options=job_categories.get("search_city", []),
     ),
     CategoryFilter(
         operator=job_schema.search_city.not_in_,
         param_name="search_cities_exclude",
         field_name="search_city",
-        description="Search cities that should be excluded.",
+        description=f"Cities to exclude. {FIELD_DESCRIPTIONS['location']}",
         options=job_categories.get("search_city", []),
     ),
     # Search country filters - available in categories.json
@@ -120,14 +99,14 @@ filters = [
         operator=job_schema.search_country.in_,
         param_name="search_countries_include",
         field_name="search_country",
-        description="Search countries that should be included. Available: United States, United Kingdom, Canada, Australia.",
+        description=f"Countries to include. {FIELD_DESCRIPTIONS['location']} Available: United States, United Kingdom, Canada, Australia.",
         options=job_categories.get("search_country", []),
     ),
     CategoryFilter(
         operator=job_schema.search_country.not_in_,
         param_name="search_countries_exclude",
         field_name="search_country",
-        description="Search countries that should be excluded. Available: United States, United Kingdom, Canada, Australia.",
+        description=f"Countries to exclude. {FIELD_DESCRIPTIONS['location']}",
         options=job_categories.get("search_country", []),
     ),
     # Company filters - dynamic values (many unique companies)
@@ -135,22 +114,14 @@ filters = [
         operator=job_schema.company.in_,
         param_name="companies_include",
         field_name="company",
-        description=company_description + " Companies that should be included.",
+        description="Companies to include. Use when specific company names are mentioned (Google, Microsoft, Apple, etc.) or company types (tech startup, consulting firm).",
         options=job_categories.get("company", []),
     ),
     CategoryFilter(
         operator=job_schema.company.not_in_,
         param_name="companies_exclude",
         field_name="company",
-        description=company_description + " Companies that should be excluded.",
-        options=job_categories.get("company", []),
-    ),
-    # Company filters
-    CategoryFilter(
-        operator=job_schema.company.in_,
-        param_name="companies_include",
-        field_name="company",
-        description=company_description + " Companies that should be included.",
+        description="Companies to exclude. Use when specific company names should be avoided.",
         options=job_categories.get("company", []),
     ),
     # Job level filters - available in categories.json
@@ -158,14 +129,14 @@ filters = [
         operator=job_schema.job_level.in_,
         param_name="job_levels_include",
         field_name="job_level",
-        description=experience_level_description + " Job levels that should be included. Available: Associate, Mid Senior.",
+        description=f"Job levels to include. {FIELD_DESCRIPTIONS['experience_level']}",
         options=job_categories.get("job_level", []),
     ),
     CategoryFilter(
         operator=job_schema.job_level.not_in_,
         param_name="job_levels_exclude",
         field_name="job_level",
-        description=experience_level_description + " Job levels that should be excluded.",
+        description=f"Job levels to exclude. {FIELD_DESCRIPTIONS['experience_level']}",
         options=job_categories.get("job_level", []),
     ),
     # Job type filters - available in categories.json
@@ -173,14 +144,14 @@ filters = [
         operator=job_schema.job_type.in_,
         param_name="job_types_include",
         field_name="job_type",
-        description=work_type_description + " Job types that should be included. Available: Onsite, Hybrid, Remote.",
+        description=f"Job types to include. {FIELD_DESCRIPTIONS['work_type']}",
         options=job_categories.get("job_type", []),
     ),
     CategoryFilter(
         operator=job_schema.job_type.not_in_,
         param_name="job_types_exclude",
         field_name="job_type",
-        description=work_type_description + " Job types that should be excluded.",
+        description=f"Job types to exclude. {FIELD_DESCRIPTIONS['work_type']}",
         options=job_categories.get("job_type", []),
     ),
     # Job category filters - available in categories.json
@@ -188,14 +159,14 @@ filters = [
         operator=job_schema.job_category.in_,
         param_name="job_categories_include",
         field_name="job_category",
-        description="Job categories that should be included. Available: data_analyst, software_engineer, data_engineer, data_scientist.",
+        description=f"Job categories to include. Use {FIELD_DESCRIPTIONS['title']} mapping logic. Available: data_analyst, software_engineer, data_engineer, data_scientist.",
         options=job_categories.get("job_category", []),
     ),
     CategoryFilter(
         operator=job_schema.job_category.not_in_,
         param_name="job_categories_exclude",
         field_name="job_category",
-        description="Job categories that should be excluded.",
+        description="Job categories to exclude. Use when specific job types should be avoided.",
         options=job_categories.get("job_category", []),
     ),
 ]
