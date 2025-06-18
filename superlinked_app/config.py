@@ -10,12 +10,12 @@ class Settings(BaseSettings):
     """Configuration settings for the Superlinked application."""
 
     # Embedding settings
-    text_embedder_name: str = "Qwen/Qwen3-Embedding-0.6B"
-    chunk_size: int = 10000
+    text_embedder_name: str = "sentence-transformers/all-mpnet-base-v2"
+    chunk_size: int = 1000
 
     # Path to the dataset
-    path_dataset: str = "data/postings.csv"
-    path_categories: str = "data/low_cardinality_categories.json"
+    path_dataset: str = "data/combined_jobs_dataset.csv"
+    path_categories: str = "data/categories.json"
     
     # OpenAI for Natural Language Query
     openai_model: str = "gpt-4.1-nano"

@@ -3,30 +3,26 @@ from collections import namedtuple
 from superlinked import framework as sl
 
 from superlinked_app.index import (
-    applies_space,
     description_space,
     index,
     job_schema,
-    salary_space,
+    load_categories,
+    skills_space,
     title_space,
-    views_space,
 )
 from superlinked_app.nlq import (
     company_description,
     description_description,
     experience_level_description,
-    get_job_categories,
     location_description,
     openai_config,
-    remote_preference_description,
-    salary_description,
+    skills_description,
     system_prompt,
     title_description,
     work_type_description,
 )
-from superlinked_app.config import settings
 
-job_categories = get_job_categories()
+job_categories = load_categories()
 
 # query_debug is a simple way to check if server has some data ingested:
 query_debug = sl.Query(index).find(job_schema).limit(3).select_all()
@@ -38,13 +34,7 @@ query = (
         weights={
             description_space: sl.Param("description_weight", default=1.0),
             title_space: sl.Param("title_weight", default=0.8),
-            salary_space: sl.Param(
-                "salary_weight",
-                description=salary_description,
-                default=0.0,
-            ),
-            views_space: sl.Param("views_weight", default=0.1),
-            applies_space: sl.Param("applies_weight", default=0.1),
+            skills_space: sl.Param("skills_weight", default=0.6),
         },
     )
     .find(job_schema)
@@ -58,6 +48,11 @@ query = (
         sl.Param("title", description=title_description),
         weight=sl.Param("similar_title_weight", default=0.8),
     )
+    .similar(
+        skills_space.category,
+        sl.Param("skills", description=skills_description),
+        weight=sl.Param("similar_skills_weight", default=0.6),
+    )
 )
 
 # We can specify number of retrieved results like this:
@@ -69,146 +64,150 @@ query = query.select_all()
 # .. and all the metadata including knn_params and partial_scores
 query = query.include_metadata()
 
-# Now let's add hard-filtering for numerical attributes:
-query = (
-    query.filter(job_schema.normalized_salary >= sl.Param("min_salary", default=0))
-    .filter(job_schema.normalized_salary <= sl.Param("max_salary", default=1000000))
-    .filter(job_schema.views >= sl.Param("min_views", default=0))
-    .filter(job_schema.views <= sl.Param("max_views", default=1000))
-    .filter(job_schema.applies >= sl.Param("min_applies", default=0))
-    .filter(job_schema.applies <= sl.Param("max_applies", default=1000))
-    .filter(job_schema.remote_allowed >= sl.Param("remote_allowed_min", default=0))
-    .filter(job_schema.remote_allowed <= sl.Param("remote_allowed_max", default=1))
-)
-
-# ... and for all categorical attributes:
+# Now let's add hard-filtering for categorical attributes based on actual schema:
 CategoryFilter = namedtuple(
     "CategoryFilter", ["operator", "param_name", "field_name", "description", "options"]
 )
 
 filters = [
-    # Location filters
+    # Job location filters
     CategoryFilter(
-        operator=job_schema.location.in_,
-        param_name="locations_include",
-        field_name="location",
-        description=location_description + " Locations that should be included.",
-        options=job_categories.get("location", []),
+        operator=job_schema.job_location.in_,
+        param_name="job_locations_include",
+        field_name="job_location",
+        description=location_description + " Job locations that should be included.",
+        options=job_categories.get("job_location", []),
     ),
     CategoryFilter(
-        operator=job_schema.location.not_in_,
-        param_name="locations_exclude",
-        field_name="location",
-        description=location_description + " Locations that should be excluded.",
-        options=job_categories.get("location", []),
+        operator=job_schema.job_location.not_in_,
+        param_name="job_locations_exclude",
+        field_name="job_location",
+        description=location_description + " Job locations that should be excluded.",
+        options=job_categories.get("job_location", []),
+    ),
+    # City filters
+    CategoryFilter(
+        operator=job_schema.city.in_,
+        param_name="cities_include",
+        field_name="city",
+        description="Cities that should be included.",
+        options=job_categories.get("city", []),
+    ),
+    CategoryFilter(
+        operator=job_schema.city.not_in_,
+        param_name="cities_exclude",
+        field_name="city",
+        description="Cities that should be excluded.",
+        options=job_categories.get("city", []),
+    ),
+    # State filters
+    CategoryFilter(
+        operator=job_schema.state.in_,
+        param_name="states_include",
+        field_name="state",
+        description="States that should be included.",
+        options=job_categories.get("state", []),
+    ),
+    CategoryFilter(
+        operator=job_schema.state.not_in_,
+        param_name="states_exclude",
+        field_name="state",
+        description="States that should be excluded.",
+        options=job_categories.get("state", []),
+    ),
+    # Search city filters
+    CategoryFilter(
+        operator=job_schema.search_city.in_,
+        param_name="search_cities_include",
+        field_name="search_city",
+        description="Search cities that should be included.",
+        options=job_categories.get("search_city", []),
+    ),
+    CategoryFilter(
+        operator=job_schema.search_city.not_in_,
+        param_name="search_cities_exclude",
+        field_name="search_city",
+        description="Search cities that should be excluded.",
+        options=job_categories.get("search_city", []),
+    ),
+    # Search country filters
+    CategoryFilter(
+        operator=job_schema.search_country.in_,
+        param_name="search_countries_include",
+        field_name="search_country",
+        description="Search countries that should be included.",
+        options=job_categories.get("search_country", []),
+    ),
+    CategoryFilter(
+        operator=job_schema.search_country.not_in_,
+        param_name="search_countries_exclude",
+        field_name="search_country",
+        description="Search countries that should be excluded.",
+        options=job_categories.get("search_country", []),
     ),
     # Company filters
     CategoryFilter(
-        operator=job_schema.company_name.in_,
+        operator=job_schema.company.in_,
         param_name="companies_include",
-        field_name="company_name",
+        field_name="company",
         description=company_description + " Companies that should be included.",
-        options=job_categories.get("company_name", []),
+        options=job_categories.get("company", []),
     ),
     CategoryFilter(
-        operator=job_schema.company_name.not_in_,
+        operator=job_schema.company.not_in_,
         param_name="companies_exclude",
-        field_name="company_name",
+        field_name="company",
         description=company_description + " Companies that should be excluded.",
-        options=job_categories.get("company_name", []),
+        options=job_categories.get("company", []),
     ),
-    # Work type filters
+    # Job level filters
     CategoryFilter(
-        operator=job_schema.work_type.in_,
-        param_name="work_types_include",
-        field_name="work_type",
-        description=work_type_description + " Types that should be included.",
-        options=job_categories.get("work_type", []),
-    ),
-    CategoryFilter(
-        operator=job_schema.work_type.not_in_,
-        param_name="work_types_exclude",
-        field_name="work_type",
-        description=work_type_description + " Types that should be excluded.",
-        options=job_categories.get("work_type", []),
-    ),
-    # Formatted work type (remote preference) filters
-    CategoryFilter(
-        operator=job_schema.formatted_work_type.in_,
-        param_name="remote_preferences_include",
-        field_name="formatted_work_type",
-        description=remote_preference_description + " Values that should be included.",
-        options=job_categories.get("formatted_work_type", []),
+        operator=job_schema.job_level.in_,
+        param_name="job_levels_include",
+        field_name="job_level",
+        description=experience_level_description + " Job levels that should be included.",
+        options=job_categories.get("job_level", []),
     ),
     CategoryFilter(
-        operator=job_schema.formatted_work_type.not_in_,
-        param_name="remote_preferences_exclude",
-        field_name="formatted_work_type",
-        description=remote_preference_description + " Values that should be excluded.",
-        options=job_categories.get("formatted_work_type", []),
+        operator=job_schema.job_level.not_in_,
+        param_name="job_levels_exclude",
+        field_name="job_level",
+        description=experience_level_description + " Job levels that should be excluded.",
+        options=job_categories.get("job_level", []),
     ),
-    # Experience level filters
+    # Job type filters (work arrangement)
     CategoryFilter(
-        operator=job_schema.formatted_experience_level.in_,
-        param_name="experience_levels_include",
-        field_name="formatted_experience_level",
-        description=experience_level_description + " Levels that should be included.",
-        options=job_categories.get("formatted_experience_level", []),
-    ),
-    CategoryFilter(
-        operator=job_schema.formatted_experience_level.not_in_,
-        param_name="experience_levels_exclude",
-        field_name="formatted_experience_level",
-        description=experience_level_description + " Levels that should be excluded.",
-        options=job_categories.get("formatted_experience_level", []),
-    ),
-    # Pay period filters
-    CategoryFilter(
-        operator=job_schema.pay_period.in_,
-        param_name="pay_periods_include",
-        field_name="pay_period",
-        description="Pay periods that should be included (YEARLY, MONTHLY, HOURLY, etc.).",
-        options=job_categories.get("pay_period", []),
+        operator=job_schema.job_type.in_,
+        param_name="job_types_include",
+        field_name="job_type",
+        description=work_type_description + " Job types that should be included.",
+        options=job_categories.get("job_type", []),
     ),
     CategoryFilter(
-        operator=job_schema.pay_period.not_in_,
-        param_name="pay_periods_exclude",
-        field_name="pay_period",
-        description="Pay periods that should be excluded.",
-        options=job_categories.get("pay_period", []),
+        operator=job_schema.job_type.not_in_,
+        param_name="job_types_exclude",
+        field_name="job_type",
+        description=work_type_description + " Job types that should be excluded.",
+        options=job_categories.get("job_type", []),
     ),
-    # Currency filters
+    # Job category filters
     CategoryFilter(
-        operator=job_schema.currency.in_,
-        param_name="currencies_include",
-        field_name="currency",
-        description="Currencies that should be included (USD, CAD, EUR, etc.).",
-        options=job_categories.get("currency", []),
-    ),
-    CategoryFilter(
-        operator=job_schema.currency.not_in_,
-        param_name="currencies_exclude",
-        field_name="currency",
-        description="Currencies that should be excluded.",
-        options=job_categories.get("currency", []),
-    ),
-    # Compensation type filters
-    CategoryFilter(
-        operator=job_schema.compensation_type.in_,
-        param_name="compensation_types_include",
-        field_name="compensation_type",
-        description="Compensation types that should be included (BASE_SALARY, etc.).",
-        options=job_categories.get("compensation_type", []),
+        operator=job_schema.job_category.in_,
+        param_name="job_categories_include",
+        field_name="job_category",
+        description="Job categories that should be included (data_analyst, software_engineer, etc.).",
+        options=job_categories.get("job_category", []),
     ),
     CategoryFilter(
-        operator=job_schema.compensation_type.not_in_,
-        param_name="compensation_types_exclude",
-        field_name="compensation_type",
-        description="Compensation types that should be excluded.",
-        options=job_categories.get("compensation_type", []),
+        operator=job_schema.job_category.not_in_,
+        param_name="job_categories_exclude",
+        field_name="job_category",
+        description="Job categories that should be excluded.",
+        options=job_categories.get("job_category", []),
     ),
 ]
 
+# Apply all categorical filters
 for filter_item in filters:
     if filter_item.options:  # Only add filter if options are available
         param = sl.Param(
