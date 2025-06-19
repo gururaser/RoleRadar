@@ -102,17 +102,19 @@ export default function HomePage() {
 
         {/* Results */}
         {hasSearched && !isLoading && (
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto animate-fade-in">
             {/* Detected Filters */}
             {searchResponse?.metadata?.search_params && (
-              <DetectedFilters 
-                filters={searchResponse.metadata.search_params}
-                queryCount={results.length}
-              />
+              <div className="animate-slide-in-top" style={{ animationDelay: '100ms' }}>
+                <DetectedFilters 
+                  filters={searchResponse.metadata.search_params}
+                  queryCount={results.length}
+                />
+              </div>
             )}
 
             {results.length > 0 && (
-              <div className="mb-6">
+              <div className="mb-6 animate-slide-in-top" style={{ animationDelay: '200ms' }}>
                 <h3 className="text-xl font-semibold text-gray-100 mb-2">
                   Found {results.length} job{results.length !== 1 ? 's' : ''} matching your search
                 </h3>
@@ -123,7 +125,7 @@ export default function HomePage() {
             )}
 
             {results.length === 0 && !error && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 animate-fade-in" style={{ animationDelay: '300ms' }}>
                 <div className="w-16 h-16 bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
@@ -133,12 +135,17 @@ export default function HomePage() {
             )}
 
             <div className="space-y-6">
-              {results.map((job) => (
-                <JobCard 
-                  key={job.id} 
-                  job={job} 
-                  onViewDetails={handleViewDetails}
-                />
+              {results.map((job, index) => (
+                <div
+                  key={job.id}
+                  className="animate-slide-in-bottom"
+                  style={{ animationDelay: `${300 + index * 100}ms` }}
+                >
+                  <JobCard 
+                    job={job} 
+                    onViewDetails={handleViewDetails}
+                  />
+                </div>
               ))}
             </div>
           </div>
