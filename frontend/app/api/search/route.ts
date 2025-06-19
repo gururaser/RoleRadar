@@ -9,6 +9,8 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'accept': 'application/json',
+        'x-include-metadata': 'true'
       },
       body: JSON.stringify(body)
     })

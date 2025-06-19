@@ -7,12 +7,14 @@ import SearchSection from '../components/SearchSection'
 import LoadingAnimation from '../components/LoadingAnimation'
 import JobCard from '../components/JobCard'
 import JobDetailsModal from '../components/JobDetailsModal'
+import DetectedFilters from '../components/DetectedFilters'
 import Footer from '../components/Footer'
 import { JobResult, SearchResponse } from '../types'
 
 export default function HomePage() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<JobResult[]>([])
+  const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
   const [error, setError] = useState('')
@@ -21,6 +23,7 @@ export default function HomePage() {
 
   const handleQueryClear = () => {
     setResults([])
+    setSearchResponse(null)
     setHasSearched(false)
     setError('')
   }
@@ -41,7 +44,7 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           natural_query: query,
-          limit: 10
+          limit: 25
         })
       })
 
@@ -51,9 +54,11 @@ export default function HomePage() {
 
       const data: SearchResponse = await response.json()
       setResults(data.entries)
+      setSearchResponse(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setResults([])
+      setSearchResponse(null)
     } finally {
       setIsLoading(false)
     }
@@ -98,6 +103,14 @@ export default function HomePage() {
         {/* Results */}
         {hasSearched && !isLoading && (
           <div className="max-w-6xl mx-auto">
+            {/* Detected Filters */}
+            {searchResponse?.metadata?.search_params && (
+              <DetectedFilters 
+                filters={searchResponse.metadata.search_params}
+                queryCount={results.length}
+              />
+            )}
+
             {results.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-100 mb-2">
