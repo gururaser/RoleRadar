@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react'
+import Image from 'next/image'
 
 interface SearchSectionProps {
   query: string
@@ -29,6 +30,24 @@ export default function SearchSection({ query, setQuery, onSearch, isLoading, ha
     <>
       {/* Hero Section */}
       <div className="text-center mb-12">
+        {/* Large RoleRadar Logo */}
+          <div className="flex flex-col items-center mb-10">
+          <div className="w-48 h-48 flex items-center justify-center mb-6">
+            <Image 
+              src="/roleradar_logo3.png" 
+              alt="RoleRadar Logo" 
+              width={192}
+              height={192}
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div className="text-center">
+            <h1 className="text-6xl font-bold text-gray-100 mb-3">RoleRadar</h1>
+            <p className="text-lg text-gray-400 mb-8">Spot your next role in a heartbeat</p>
+          </div>
+        </div>
+        
         <h2 className="text-4xl font-bold text-gray-100 mb-4">
           Find Your Dream Job with AI
         </h2>
