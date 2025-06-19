@@ -27,9 +27,10 @@ interface JobDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   onJobSelect?: (job: JobResult) => void
+  onSeeMore?: (jobId: string) => void
 }
 
-export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: JobDetailsModalProps) {
+export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect, onSeeMore }: JobDetailsModalProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   
   // ESC key handler
@@ -245,6 +246,7 @@ export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: J
           <SimilarJobsCarousel 
             currentJobId={job.id}
             onJobSelect={onJobSelect || (() => {})}
+            onSeeMore={onSeeMore || (() => {})}
           />
         </div>
       </div>

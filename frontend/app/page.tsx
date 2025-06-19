@@ -74,6 +74,57 @@ export default function HomePage() {
     setSelectedJob(null)
   }
 
+  const handleSeeMore = async (jobId: string) => {
+    // Get the job title from the selected job
+    const jobTitle = selectedJob?.fields.job_title || 'this job'
+    
+    // Close modal first
+    closeModal()
+    
+    // Clear previous results
+    setResults([])
+    setSearchResponse(null)
+    setError('')
+    setIsLoading(true)
+    setHasSearched(true)
+
+    try {
+      const response = await fetch('/api/similar-jobs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: jobId,
+          limit: 25,
+          description_weight: 0.8,
+          title_weight: 1.0,
+          skills_weight: 0.9
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch similar jobs')
+      }
+
+      const data = await response.json()
+      const jobs = data.entries || []
+      
+      // Filter out the original job and set results
+      const filteredJobs = jobs.filter((job: JobResult) => job.id !== jobId)
+      setResults(filteredJobs)
+      setSearchResponse(data)
+      
+      // Update query to show what we're searching for
+      setQuery(`Similar jobs to: ${jobTitle}`)
+    } catch (err) {
+      setError('Failed to load similar jobs')
+      console.error('Error fetching similar jobs:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       <Header />
@@ -162,6 +213,7 @@ export default function HomePage() {
             setSelectedJob(job)
             // Modal is already open, so we don't change isModalOpen
           }}
+          onSeeMore={handleSeeMore}
         />
       )}
 

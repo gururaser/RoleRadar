@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, MapPin, Building } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, Building, ArrowRight } from 'lucide-react'
 
 interface JobResult {
   id: string
@@ -24,16 +24,24 @@ interface JobResult {
 interface SimilarJobsCarouselProps {
   currentJobId: string
   onJobSelect: (job: JobResult) => void
+  onSeeMore: (jobId: string) => void
 }
 
-export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: SimilarJobsCarouselProps) {
+export default function SimilarJobsCarousel({ currentJobId, onJobSelect, onSeeMore }: SimilarJobsCarouselProps) {
   const [similarJobs, setSimilarJobs] = useState<JobResult[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const itemsPerView = 3 // Number of items visible at once
-  const maxIndex = Math.max(0, similarJobs.length - itemsPerView)
+  const itemsPerView = 3
+  // Simple approach: always show exactly 3 items at a time
+  const allItems = [...similarJobs]
+  if (similarJobs.length > 0) {
+    allItems.push('see-more' as any) // Add see more placeholder
+  }
+  
+  const canNavigate = allItems.length > itemsPerView
+  const maxIndex = canNavigate ? allItems.length - itemsPerView : 0
 
   useEffect(() => {
     fetchSimilarJobs()
@@ -63,17 +71,13 @@ export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: Simil
       }
 
       const data = await response.json()
-      
-      // Check if data has entries property (same as search endpoint)
       const jobs = data.entries || []
-      
-      // Filter out the current job from results
       const filteredJobs = jobs.filter((job: JobResult) => job.id !== currentJobId)
       setSimilarJobs(filteredJobs)
     } catch (err) {
       setError('Failed to load similar jobs')
       console.error('Error fetching similar jobs:', err)
-      setSimilarJobs([]) // Clear any existing data
+      setSimilarJobs([])
     } finally {
       setLoading(false)
     }
@@ -121,8 +125,7 @@ export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: Simil
       <h3 className="text-lg font-semibold text-gray-100 mb-4">Similar Jobs</h3>
       
       <div className="relative">
-        {/* Navigation Buttons */}
-        {similarJobs.length > itemsPerView && (
+        {canNavigate && (
           <>
             <button
               onClick={prevSlide}
@@ -134,7 +137,7 @@ export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: Simil
             
             <button
               onClick={nextSlide}
-              disabled={currentIndex === maxIndex}
+              disabled={currentIndex >= maxIndex}
               className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-full p-2 transition-colors"
             >
               <ChevronRight className="w-5 h-5 text-gray-200" />
@@ -142,37 +145,33 @@ export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: Simil
           </>
         )}
 
-        {/* Carousel Container */}
-        <div className="overflow-hidden px-8">
+        <div className="overflow-hidden px-10">
           <div 
             className="flex transition-transform duration-300 ease-in-out gap-4"
-            style={{ transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)` }}
+            style={{ transform: `translateX(-${currentIndex * 33.333}%)` }}
           >
             {similarJobs.map((job) => (
               <div
                 key={job.id}
-                className="flex-shrink-0 w-full md:w-1/3 cursor-pointer"
+                className="flex-shrink-0 cursor-pointer"
+                style={{ width: 'calc(33.333% - 10.667px)' }} // 33.33% minus gap compensation
                 onClick={() => onJobSelect(job)}
               >
-                <div className="bg-gray-900 hover:bg-gray-800 rounded-lg p-4 h-full transition-colors border border-gray-700 hover:border-gray-600">
-                  {/* Job Title */}
+                <div className="bg-gray-900 hover:bg-gray-800 rounded-lg p-4 h-full transition-colors border border-gray-700 hover:border-gray-600 min-h-[200px]">
                   <h4 className="font-semibold text-gray-100 mb-2 line-clamp-2">
                     {job.fields.job_title}
                   </h4>
                   
-                  {/* Company */}
                   <div className="flex items-center text-sm text-gray-400 mb-2">
                     <Building className="w-4 h-4 mr-1" />
                     <span className="truncate">{job.fields.company}</span>
                   </div>
                   
-                  {/* Location */}
                   <div className="flex items-center text-sm text-gray-400 mb-3">
                     <MapPin className="w-4 h-4 mr-1" />
                     <span className="truncate">{job.fields.job_location}</span>
                   </div>
                   
-                  {/* Job Level */}
                   <div className="flex items-center justify-between mb-3">
                     <span className={`px-2 py-1 rounded-full text-xs ${getJobLevelColor(job.fields.job_level)}`}>
                       {job.fields.job_level}
@@ -182,7 +181,6 @@ export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: Simil
                     </span>
                   </div>
                   
-                  {/* Skills Preview */}
                   {job.fields.job_skills && job.fields.job_skills.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {formatSkills(job.fields.job_skills).slice(0, 3).map((skill) => (
@@ -203,23 +201,29 @@ export default function SimilarJobsCarousel({ currentJobId, onJobSelect }: Simil
                 </div>
               </div>
             ))}
+            
+            <div 
+              className="flex-shrink-0"
+              style={{ width: 'calc(33.333% - 10.667px)' }}
+            >
+              <div 
+                className="bg-gray-900 hover:bg-gray-800 rounded-lg p-4 h-full transition-colors border border-gray-700 hover:border-primary-500 cursor-pointer flex flex-col items-center justify-center min-h-[200px] group"
+                onClick={() => onSeeMore(currentJobId)}
+              >
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-primary-600 hover:bg-primary-500 rounded-full flex items-center justify-center mb-4 mx-auto transition-colors group-hover:scale-110 transform duration-200">
+                    <ArrowRight className="w-6 h-6 text-white" />
+                  </div>
+                  <h4 className="font-semibold text-gray-100 mb-2">See More Similar Jobs</h4>
+                  <p className="text-sm text-gray-400 mb-3">Discover more jobs like this one</p>
+                  <div className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-sm font-medium transition-colors group-hover:bg-primary-500">
+                    View All
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Dots Indicator */}
-        {similarJobs.length > itemsPerView && (
-          <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: maxIndex + 1 }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex ? 'bg-blue-500' : 'bg-gray-600'
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )

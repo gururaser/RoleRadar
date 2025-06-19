@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function Header() {
   return (
     <header className="bg-gray-800 shadow-lg border-b border-gray-700">
@@ -5,10 +7,13 @@ export default function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 flex items-center justify-center">
-              <img 
+              <Image 
                 src="/roleradar_logo2.png" 
                 alt="RoleRadar Logo" 
-                className="w-12 h-12 object-contain"
+                width={48}
+                height={48}
+                className="object-contain"
+                priority
               />
             </div>
             <div>
