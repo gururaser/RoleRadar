@@ -1,7 +1,7 @@
 from superlinked import framework as sl
 
 from superlinked_app.index import index, job_schema
-from superlinked_app.query import query, query_debug
+from superlinked_app.query import query, query_debug, similar_jobs_query
 from superlinked_app.config import settings
 
 # Setup the executor
@@ -31,6 +31,7 @@ executor = sl.RestExecutor(
     queries=[
         sl.RestQuery(sl.RestDescriptor("job"), query),
         sl.RestQuery(sl.RestDescriptor("job-debug"), query_debug),
+        sl.RestQuery(sl.RestDescriptor("similar-jobs"), similar_jobs_query),
     ],
     vector_database=vector_database,
 )

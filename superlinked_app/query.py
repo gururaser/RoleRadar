@@ -19,6 +19,27 @@ from superlinked_app.nlq import (
 # query_debug is a simple way to check if server has some data ingested:
 query_debug = sl.Query(index).find(job_schema).limit(3).select_all()
 
+# Similar jobs query to find jobs similar to a given job
+# Uses a specific job ID to find similar job postings
+similar_jobs_query = (
+    sl.Query(
+        index,
+        weights={
+            description_space: sl.Param("description_weight", default=0.8),
+            title_space: sl.Param("title_weight", default=1.0),
+            skills_space: sl.Param("skills_weight", default=0.9),
+        },
+    )
+    .find(job_schema)
+    .with_vector(job_schema, sl.Param("id"))
+    .select_all()
+    .limit(sl.Param("limit", default=10))
+    .include_metadata()
+)
+
+# Apply filters to similar jobs query
+similar_jobs_query = apply_filters(similar_jobs_query)
+
 # Let's define a main query that will be used for multi-modal semantic search:
 query = (
     sl.Query(
