@@ -1,4 +1,5 @@
-import { Building, MapPin, Globe, X, ExternalLink } from 'lucide-react'
+import { Building, MapPin, Globe, X, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState } from 'react'
 import SimilarJobsCarousel from './SimilarJobsCarousel'
 
 interface JobResult {
@@ -29,6 +30,8 @@ interface JobDetailsModalProps {
 }
 
 export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: JobDetailsModalProps) {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  
   if (!isOpen) return null
 
   const formatSkills = (skills: string[]) => {
@@ -132,7 +135,28 @@ export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: J
             <h3 className="text-lg font-semibold text-gray-100 mb-3">Job Description</h3>
             <div className="bg-gray-900 rounded-lg p-4">
               <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-                {job.fields.job_summary}
+                <div 
+                  className={`text-expand-animation overflow-hidden ${
+                    isDescriptionExpanded ? 'max-h-none' : 'max-h-32'
+                  }`}
+                >
+                  {job.fields.job_summary}
+                </div>
+                
+                {/* Show More/Less Button */}
+                {job.fields.job_summary && job.fields.job_summary.length > 300 && (
+                  <button
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    className="flex items-center space-x-1 mt-3 text-primary-400 hover:text-primary-300 text-sm font-medium transition-colors duration-200"
+                  >
+                    <span>{isDescriptionExpanded ? 'Show Less' : 'Show More'}</span>
+                    {isDescriptionExpanded ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>

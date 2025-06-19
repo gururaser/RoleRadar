@@ -45,6 +45,11 @@
     opacity: 0;
   }
 
+  /* Text expansion animation */
+  .text-expand-animation {
+    transition: max-height 0.3s ease-in-out;
+  }
+
   .animate-slide-in-top {
     animation: slideInTop 0.6s ease-out forwards;
     opacity: 0;
