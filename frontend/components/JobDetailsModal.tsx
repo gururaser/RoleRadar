@@ -1,5 +1,5 @@
 import { Building, MapPin, Globe, X, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SimilarJobsCarousel from './SimilarJobsCarousel'
 
 interface JobResult {
@@ -31,6 +31,26 @@ interface JobDetailsModalProps {
 
 export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: JobDetailsModalProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  
+  // ESC key handler
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen, onClose])
   
   if (!isOpen) return null
 
@@ -66,9 +86,18 @@ export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: J
     }
   }
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      onClick={handleOverlayClick}
+    >
+      <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto modal-content">
         {/* Modal Header */}
         <div className="flex justify-between items-start p-6 border-b border-gray-700">
           <div className="flex-1">
