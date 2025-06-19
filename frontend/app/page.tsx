@@ -158,6 +158,10 @@ export default function HomePage() {
           job={selectedJob}
           isOpen={isModalOpen}
           onClose={closeModal}
+          onJobSelect={(job) => {
+            setSelectedJob(job)
+            // Modal is already open, so we don't change isModalOpen
+          }}
         />
       )}
 

@@ -1,4 +1,5 @@
 import { Building, MapPin, Globe, X, ExternalLink } from 'lucide-react'
+import SimilarJobsCarousel from './SimilarJobsCarousel'
 
 interface JobResult {
   id: string
@@ -24,9 +25,10 @@ interface JobDetailsModalProps {
   job: JobResult
   isOpen: boolean
   onClose: () => void
+  onJobSelect?: (job: JobResult) => void
 }
 
-export default function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModalProps) {
+export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect }: JobDetailsModalProps) {
   if (!isOpen) return null
 
   const formatSkills = (skills: string[]) => {
@@ -185,6 +187,12 @@ export default function JobDetailsModal({ job, isOpen, onClose }: JobDetailsModa
               <span>Apply Now</span>
             </button>
           </div>
+
+          {/* Similar Jobs Carousel */}
+          <SimilarJobsCarousel 
+            currentJobId={job.id}
+            onJobSelect={onJobSelect || (() => {})}
+          />
         </div>
       </div>
     </div>
