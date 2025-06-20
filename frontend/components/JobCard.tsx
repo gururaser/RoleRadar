@@ -54,29 +54,29 @@ export default function JobCard({ job, onViewDetails }: JobCardProps) {
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-gray-100 mb-2">
-            {job.fields.job_title}
+            {job.fields.job_title || 'Job Title Not Available'}
           </h3>
           <div className="flex items-center space-x-4 text-sm text-gray-300 mb-3">
             <div className="flex items-center space-x-1">
               <Building className="w-4 h-4" />
-              <span>{job.fields.company}</span>
+              <span>{job.fields.company || 'Company Not Available'}</span>
             </div>
             <div className="flex items-center space-x-1">
               <MapPin className="w-4 h-4" />
-              <span>{job.fields.job_location}</span>
+              <span>{job.fields.job_location || 'Location Not Available'}</span>
             </div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-sm text-gray-400 mb-2">
-            Match Score: {Math.round(job.metadata.score * 100)}%
+            Match Score: {Math.round((job.metadata.score || 0) * 100)}%
           </div>
           <div className="flex space-x-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getJobLevelColor(job.fields.job_level)}`}>
-              {job.fields.job_level}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getJobLevelColor(job.fields.job_level || 'unknown')}`}>
+              {job.fields.job_level || 'Level Not Available'}
             </span>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getJobTypeColor(job.fields.job_type)}`}>
-              {job.fields.job_type}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getJobTypeColor(job.fields.job_type || 'unknown')}`}>
+              {job.fields.job_type || 'Type Not Available'}
             </span>
           </div>
         </div>
@@ -84,8 +84,15 @@ export default function JobCard({ job, onViewDetails }: JobCardProps) {
 
       <div className="mb-4">
         <p className="text-gray-300 text-sm leading-relaxed">
-          {job.fields.job_summary.substring(0, 300)}
-          {job.fields.job_summary.length > 300 && '...'}
+          {job.fields.job_summary 
+            ? (
+              <>
+                {job.fields.job_summary.substring(0, 300)}
+                {job.fields.job_summary.length > 300 && '...'}
+              </>
+            )
+            : 'No job summary available.'
+          }
         </p>
       </div>
 
@@ -112,7 +119,12 @@ export default function JobCard({ job, onViewDetails }: JobCardProps) {
 
       <div className="flex items-center justify-between pt-4 border-t border-gray-700">
         <div className="flex items-center space-x-4 text-sm text-gray-300">
-          <span className="capitalize">{job.fields.job_category.replace('_', ' ')}</span>
+          <span className="capitalize">
+            {job.fields.job_category 
+              ? job.fields.job_category.replace('_', ' ')
+              : 'Category Not Available'
+            }
+          </span>
         </div>
         <button 
           className="btn-primary"

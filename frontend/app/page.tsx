@@ -20,6 +20,7 @@ export default function HomePage() {
   const [error, setError] = useState('')
   const [selectedJob, setSelectedJob] = useState<JobResult | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalTransitioning, setIsModalTransitioning] = useState(false)
 
   const handleQueryClear = () => {
     setResults([])
@@ -72,6 +73,18 @@ export default function HomePage() {
   const closeModal = () => {
     setIsModalOpen(false)
     setSelectedJob(null)
+    setIsModalTransitioning(false)
+  }
+
+  const handleJobSelectInModal = async (job: JobResult) => {
+    // Start transition animation
+    setIsModalTransitioning(true)
+    
+    // Wait for fade out animation
+    setTimeout(() => {
+      setSelectedJob(job)
+      setIsModalTransitioning(false)
+    }, 150) // Half of the modal animation duration
   }
 
   const handleSeeMore = async (jobId: string) => {
@@ -209,11 +222,9 @@ export default function HomePage() {
           job={selectedJob}
           isOpen={isModalOpen}
           onClose={closeModal}
-          onJobSelect={(job) => {
-            setSelectedJob(job)
-            // Modal is already open, so we don't change isModalOpen
-          }}
+          onJobSelect={handleJobSelectInModal}
           onSeeMore={handleSeeMore}
+          isTransitioning={isModalTransitioning}
         />
       )}
 
