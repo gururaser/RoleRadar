@@ -12,6 +12,13 @@ RoleRadar allows job seekers to find the most relevant opportunities instantly b
 >
 > …into a precise blend of **structural filters** (location, salary, seniority) and **semantic similarity** across job descriptions, skill tags, and company culture notes.
 
+
+> ⚠️ **Disclaimer**  
+> This project is not affiliated with any other application, website, or repository that shares the name “RoleRadar”.  
+> It is an independent, open-source project developed solely for learning and experience-building purposes.  
+> The goal is to explore and demonstrate semantic job search using technologies like Superlinked and Qdrant.
+
+
 # Demo
 https://github.com/user-attachments/assets/4b88141d-50ff-430a-abe0-1b65e6a649ff
 
