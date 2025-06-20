@@ -27,7 +27,7 @@ install:
 	@echo "⏳ Waiting 30 seconds for services to start..."
 	@sleep 30
 	@echo "🔍 Checking if Qdrant collection exists..."
-	@until curl -s http://localhost:6333/collections/default/exists 2>/dev/null | jq -e '.result.exists == true' >/dev/null 2>&1; do \
+	@until curl -s http://localhost:6333/collections/default/exists 2>/dev/null | grep -q '"exists":true'; do \
 		echo "Waiting for collection to be available..."; \
 		sleep 5; \
 	done
@@ -36,8 +36,8 @@ install:
 	@RETRY_COUNT=0; \
 	while [ $$RETRY_COUNT -lt 10 ]; do \
 		DATA_LOADER_RESPONSE=$$(curl -s http://localhost:8080/data-loader/ 2>/dev/null); \
-		if [ -n "$$DATA_LOADER_RESPONSE" ] && echo "$$DATA_LOADER_RESPONSE" | jq -e '.result' >/dev/null 2>&1; then \
-			DATA_LOADER_NAME=$$(echo "$$DATA_LOADER_RESPONSE" | jq -r '.result | keys[0]'); \
+		if [ -n "$$DATA_LOADER_RESPONSE" ] && echo "$$DATA_LOADER_RESPONSE" | grep -q '"result"'; then \
+			DATA_LOADER_NAME=$$(echo "$$DATA_LOADER_RESPONSE" | sed -n 's/.*"result":{\s*"\([^"]*\)".*/\1/p' | head -1); \
 			if [ -n "$$DATA_LOADER_NAME" ] && [ "$$DATA_LOADER_NAME" != "null" ]; then \
 				echo "📝 Found data loader name: $$DATA_LOADER_NAME"; \
 				break; \
