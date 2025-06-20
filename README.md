@@ -45,8 +45,8 @@ RoleRadar allows job seekers to find the most relevant opportunities instantly b
 - Docker and Docker Compose
 - OpenAI API Key
 - curl (for data loading)
-- jq (for JSON processing)
 - Make (optional, for command convenience)
+- For GPU mode: NVIDIA GPU with Docker GPU support
 
 ## 🚀 Installation and Setup
 
@@ -69,16 +69,34 @@ Before starting the installation, you need to:
 ### Quick Start
 ```bash
 # After completing prerequisites, install system and load data
+# You will be prompted to choose between CPU and GPU mode
 make install
 
 # Start all services
 make run
 ```
 
+### Installation Options
+
+During installation, you will be prompted to select processing mode:
+
+**CPU Mode (Recommended for most systems):**
+- Works on all systems
+- Uses CPU for embedding processing
+- Slower but more compatible
+
+**GPU Mode (For systems with NVIDIA GPU):**
+- Requires NVIDIA GPU and Docker GPU support
+- Faster embedding processing
+- Better performance for large datasets
+
 ### Manual Installation
 ```bash
-# Build and start services
-docker compose up -d --build
+# Build and start services with CPU mode
+docker compose -f docker-compose.cpu.yml up -d --build
+
+# OR build and start services with GPU mode
+docker compose -f docker-compose.gpu.yml up -d --build
 
 # Manually perform data loading
 # (Details available in Makefile)
@@ -107,8 +125,10 @@ RoleRadar understands natural, conversational queries. You can search using vari
 
 ```bash
 make help          # Display all commands
-make install       # Install system and load data
-make run           # Start all services
+make install       # Interactive installation with CPU/GPU selection
+make run           # Start all services (smart mode detection)
+make run-cpu       # Start all services with CPU mode
+make run-gpu       # Start all services with GPU mode
 make run-backend   # Start only backend services
 make run-frontend  # Start only frontend service
 make stop          # Stop all services
@@ -117,6 +137,54 @@ make logs          # Show logs from all services
 make status        # Check service status
 ```
 
+### Smart Service Management
+
+**Interactive `make run` Command:**
+The `make run` command intelligently detects your current setup:
+1. **If services are already running:** Restarts with the existing configuration (CPU or GPU)
+2. **If no services are running:** Prompts you to choose between CPU and GPU mode
+3. **Seamless switching:** You can easily switch between modes
+
+**Direct Mode Commands:**
+- `make run-cpu` - Force start with CPU processing mode
+- `make run-gpu` - Force start with GPU processing mode
+
+**Example Usage:**
+```bash
+# First time setup
+make install        # Choose CPU or GPU during installation
+
+# Smart restart (uses last configuration)
+make run           
+
+# Switch modes easily
+make stop
+make run-cpu       # Force CPU mode
+# or
+make run-gpu       # Force GPU mode
+```
+
+### Installation Process
+
+The `make install` command will:
+1. Prompt you to choose between CPU and GPU processing mode
+2. Build and start the appropriate Docker containers
+3. Wait for services to initialize
+4. Automatically load the job data into the vector database
+5. Verify that all services are running correctly
+
+### Processing Modes
+
+**CPU Mode:**
+- Uses `docker-compose.cpu.yml` configuration
+- Suitable for development and smaller datasets
+- No special hardware requirements
+
+**GPU Mode:**
+- Uses `docker-compose.gpu.yml` configuration  
+- Requires NVIDIA GPU with Docker GPU support
+- Significantly faster for large-scale embedding processing
+
 ### Dataset Features
 Each dataset typically includes:
 - Job titles and descriptions
@@ -124,6 +192,38 @@ Each dataset typically includes:
 - Location and salary ranges
 - Required skills and experience levels
 - Application links and posting dates
+
+## ⚠️ Limitations
+
+Please note the following limitations of the current demo version:
+
+### Data Scope
+- **Job Categories**: Only includes 4 job categories:
+  - Data Analyst positions
+  - Data Engineer positions  
+  - Data Scientist positions
+  - Software Engineer positions
+
+### Geographic Coverage
+- **Countries**: Limited to job postings from:
+  - 🇺🇸 United States
+  - 🇬🇧 United Kingdom
+  - 🇦🇺 Australia
+  - 🇨🇦 Canada
+
+### Temporal Coverage
+- **Data Currency**: Job postings are from **2023 only**
+- Data may not reflect current market conditions or available positions
+
+### Data Volume
+- The demo dataset contains a subset of available job postings
+- Results may be limited compared to comprehensive job search platforms
+
+**Note**: This is a demonstration version. In a production environment, the system could be easily extended to include:
+- Additional job categories and industries
+- Global geographic coverage
+- Real-time job posting updates
+- Larger and more diverse datasets
 
 ## 🤝 Contributing
 
@@ -157,6 +257,27 @@ curl http://localhost:6333/collections
 curl http://localhost:8080/health
 ```
 
+### GPU Mode Issues
+```bash
+# Check if NVIDIA Docker is installed
+docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
+
+# Check GPU availability in container
+docker compose -f docker-compose.gpu.yml exec superlinked nvidia-smi
+```
+
+### Switching Between CPU and GPU Mode
+```bash
+# Stop current services
+make stop
+
+# Clean up containers
+make clean
+
+# Run installation again to choose different mode
+make install
+```
+
 ### Port conflicts
-Check the port settings in the Docker Compose file and modify them if necessary.
+Check the port settings in the Docker Compose files and modify them if necessary.
 

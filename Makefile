@@ -3,13 +3,15 @@
 
 .DEFAULT_GOAL := run
 
-.PHONY: help install run run-backend run-frontend stop stop-backend stop-frontend clean logs status
+.PHONY: help install run run-cpu run-gpu run-backend run-frontend stop stop-backend stop-frontend clean logs status
 
 # Show help message
 help:
 	@echo "RoleRadar - Available commands:"
-	@echo "  install       - Install and setup the system with data loading"
-	@echo "  run           - Start all services (backend + frontend)"
+	@echo "  install       - Interactive installation with CPU/GPU selection"
+	@echo "  run           - Start all services (interactive mode selection if no active config)"
+	@echo "  run-cpu       - Start all services with CPU mode"
+	@echo "  run-gpu       - Start all services with GPU mode"
 	@echo "  run-backend   - Start only backend services (superlinked + qdrant)"
 	@echo "  run-frontend  - Start only frontend service"
 	@echo "  stop          - Stop all services"
@@ -23,7 +25,19 @@ help:
 # Install and setup the system with data loading
 install:
 	@echo "🚀 Starting RoleRadar installation..."
-	@docker compose up -d --build --force-recreate --no-deps
+	@echo "🖥️  Please select processing mode:"
+	@echo "  1) CPU mode (recommended for most systems)"
+	@echo "  2) GPU mode (requires NVIDIA GPU and drivers)"
+	@printf "Enter your choice (1 or 2): "; \
+	read choice; \
+	if [ "$$choice" = "2" ]; then \
+		echo "🚀 Setting up GPU mode..."; \
+		COMPOSE_FILE="docker-compose.gpu.yml"; \
+	else \
+		echo "🚀 Setting up CPU mode..."; \
+		COMPOSE_FILE="docker-compose.cpu.yml"; \
+	fi; \
+	docker compose -f $$COMPOSE_FILE up -d --build --force-recreate --no-deps
 	@echo "⏳ Waiting 30 seconds for services to start..."
 	@sleep 30
 	@echo "🔍 Checking if Qdrant collection exists..."
@@ -74,10 +88,47 @@ install:
 	@echo "🌐 Superlinked API: http://localhost:8080"
 	@echo "🗄️  Qdrant API: http://localhost:6333"
 
+# Start all services with CPU mode
+run-cpu:
+	@echo "🚀 Starting RoleRadar with CPU mode..."
+	@docker compose -f docker-compose.cpu.yml up -d
+	@echo "✅ All services started successfully with CPU mode!"
+	@echo "🌐 Frontend: http://localhost:3000"
+	@echo "🌐 Superlinked API: http://localhost:8080"
+	@echo "🗄️  Qdrant API: http://localhost:6333"
+
+# Start all services with GPU mode
+run-gpu:
+	@echo "🚀 Starting RoleRadar with GPU mode..."
+	@docker compose -f docker-compose.gpu.yml up -d
+	@echo "✅ All services started successfully with GPU mode!"
+	@echo "🌐 Frontend: http://localhost:3000"
+	@echo "🌐 Superlinked API: http://localhost:8080"
+	@echo "🗄️  Qdrant API: http://localhost:6333"
+
 # Start all services (default)
 run:
-	@echo "🚀 Starting all RoleRadar services..."
-	@docker compose up -d
+	@echo "🚀 Starting RoleRadar services..."
+	@if [ -f "docker-compose.cpu.yml" ] && docker compose -f docker-compose.cpu.yml ps superlinked >/dev/null 2>&1; then \
+		echo "Found running CPU configuration. Starting with CPU mode..."; \
+		docker compose -f docker-compose.cpu.yml up -d; \
+	elif [ -f "docker-compose.gpu.yml" ] && docker compose -f docker-compose.gpu.yml ps superlinked >/dev/null 2>&1; then \
+		echo "Found running GPU configuration. Starting with GPU mode..."; \
+		docker compose -f docker-compose.gpu.yml up -d; \
+	else \
+		echo "No active configuration found. Please select mode:"; \
+		echo "  1) CPU mode (recommended for most systems)"; \
+		echo "  2) GPU mode (requires NVIDIA GPU and drivers)"; \
+		printf "Enter your choice (1 or 2): "; \
+		read choice; \
+		if [ "$$choice" = "2" ]; then \
+			echo "🚀 Starting with GPU mode..."; \
+			docker compose -f docker-compose.gpu.yml up -d; \
+		else \
+			echo "🚀 Starting with CPU mode..."; \
+			docker compose -f docker-compose.cpu.yml up -d; \
+		fi; \
+	fi
 	@echo "✅ All services started successfully!"
 	@echo "🌐 Frontend: http://localhost:3000"
 	@echo "🌐 Superlinked API: http://localhost:8080"
@@ -86,7 +137,16 @@ run:
 # Start only backend services
 run-backend:
 	@echo "🚀 Starting RoleRadar backend services..."
-	@docker compose up -d qdrant superlinked
+	@if [ -f "docker-compose.cpu.yml" ] && docker compose -f docker-compose.cpu.yml ps superlinked >/dev/null 2>&1; then \
+		echo "Using CPU configuration..."; \
+		docker compose -f docker-compose.cpu.yml up -d qdrant superlinked; \
+	elif [ -f "docker-compose.gpu.yml" ] && docker compose -f docker-compose.gpu.yml ps superlinked >/dev/null 2>&1; then \
+		echo "Using GPU configuration..."; \
+		docker compose -f docker-compose.gpu.yml up -d qdrant superlinked; \
+	else \
+		echo "❌ No active configuration found. Please run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "✅ Backend services started successfully!"
 	@echo "🌐 Superlinked API: http://localhost:8080"
 	@echo "🗄️  Qdrant API: http://localhost:6333"
@@ -94,32 +154,45 @@ run-backend:
 # Start only frontend service
 run-frontend:
 	@echo "🚀 Starting RoleRadar frontend service..."
-	@docker compose up -d frontend
+	@if [ -f "docker-compose.cpu.yml" ] && docker compose -f docker-compose.cpu.yml ps frontend >/dev/null 2>&1; then \
+		echo "Using CPU configuration..."; \
+		docker compose -f docker-compose.cpu.yml up -d frontend; \
+	elif [ -f "docker-compose.gpu.yml" ] && docker compose -f docker-compose.gpu.yml ps frontend >/dev/null 2>&1; then \
+		echo "Using GPU configuration..."; \
+		docker compose -f docker-compose.gpu.yml up -d frontend; \
+	else \
+		echo "❌ No active configuration found. Please run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo "✅ Frontend service started successfully!"
 	@echo "🌐 Frontend: http://localhost:3000"
 
 # Stop all services
 stop:
 	@echo "🛑 Stopping all RoleRadar services..."
-	@docker compose down
+	@docker compose -f docker-compose.cpu.yml down 2>/dev/null || true
+	@docker compose -f docker-compose.gpu.yml down 2>/dev/null || true
 	@echo "✅ All services stopped successfully!"
 
 # Stop only backend services
 stop-backend:
 	@echo "🛑 Stopping RoleRadar backend services..."
-	@docker compose stop qdrant superlinked
+	@docker compose -f docker-compose.cpu.yml stop qdrant superlinked 2>/dev/null || true
+	@docker compose -f docker-compose.gpu.yml stop qdrant superlinked 2>/dev/null || true
 	@echo "✅ Backend services stopped successfully!"
 
 # Stop only frontend service
 stop-frontend:
 	@echo "🛑 Stopping RoleRadar frontend service..."
-	@docker compose stop frontend
+	@docker compose -f docker-compose.cpu.yml stop frontend 2>/dev/null || true
+	@docker compose -f docker-compose.gpu.yml stop frontend 2>/dev/null || true
 	@echo "✅ Frontend service stopped successfully!"
 
 # Clean up - stop services and remove containers/volumes
 clean:
 	@echo "🧹 Cleaning up RoleRadar environment..."
-	@docker compose down -v --remove-orphans
+	@docker compose -f docker-compose.cpu.yml down -v --remove-orphans 2>/dev/null || true
+	@docker compose -f docker-compose.gpu.yml down -v --remove-orphans 2>/dev/null || true
 	@echo "🗑️  Removing unused Docker resources..."
 	@docker system prune -f
 	@echo "✅ Cleanup completed successfully!"
@@ -127,13 +200,28 @@ clean:
 # Show logs from all services
 logs:
 	@echo "📋 Showing logs from all services..."
-	@docker compose logs -f
+	@if docker compose -f docker-compose.cpu.yml ps >/dev/null 2>&1; then \
+		docker compose -f docker-compose.cpu.yml logs -f; \
+	elif docker compose -f docker-compose.gpu.yml ps >/dev/null 2>&1; then \
+		docker compose -f docker-compose.gpu.yml logs -f; \
+	else \
+		echo "❌ No active services found. Please run 'make install' first."; \
+	fi
 
 # Check service status
 status:
 	@echo "📊 RoleRadar Service Status:"
 	@echo "=============================="
-	@docker compose ps
+	@if docker compose -f docker-compose.cpu.yml ps >/dev/null 2>&1; then \
+		echo "Using CPU configuration:"; \
+		docker compose -f docker-compose.cpu.yml ps; \
+	elif docker compose -f docker-compose.gpu.yml ps >/dev/null 2>&1; then \
+		echo "Using GPU configuration:"; \
+		docker compose -f docker-compose.gpu.yml ps; \
+	else \
+		echo "❌ No active configuration found. Please run 'make install' first."; \
+		exit 1; \
+	fi
 	@echo ""
 	@echo "🔍 Health Check Results:"
 	@echo "------------------------"

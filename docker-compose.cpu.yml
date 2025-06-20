@@ -17,7 +17,7 @@ services:
       - "project=roleradar"
       - "service=qdrant"
 
-  # Superlinked Server
+  # Superlinked Server (CPU Mode)
   superlinked:
     build:
       context: ./superlinked_app
@@ -25,6 +25,8 @@ services:
     container_name: roleradar_superlinked
     env_file:
       - ./superlinked_app/.env
+    environment:
+      - GPU_EMBEDDING_THRESHOLD=0
     ports:
       - "8080:8080"
     volumes:
@@ -34,13 +36,6 @@ services:
     depends_on:
       - qdrant
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     labels:
       - "project=roleradar"
       - "service=superlinked"
