@@ -43,15 +43,32 @@ RoleRadar allows job seekers to find the most relevant opportunities instantly b
 ## 📋 Requirements
 
 - Docker and Docker Compose
+- OpenAI API Key
 - curl (for data loading)
 - jq (for JSON processing)
 - Make (optional, for command convenience)
 
 ## 🚀 Installation and Setup
 
+### Prerequisites
+Before starting the installation, you need to:
+
+1. **Download Required Datasets**: Download the following datasets from Kaggle and place them in the `data/` folder with correct naming:
+   - `data_analyst_jobs.csv` - [Data Analyst Jobs](https://www.kaggle.com/datasets/asaniczka/data-analyst-job-postings)
+   - `data_engineer_jobs.csv` - [Data Engineer Jobs](https://www.kaggle.com/datasets/asaniczka/linkedin-data-engineer-job-postings)
+   - `data_scientist.csv` - [Data Scientist Jobs](https://www.kaggle.com/datasets/asaniczka/data-scientist-linkedin-job-postings)
+   - `software_engineer_jobs.csv` - [Software Engineer Jobs](https://www.kaggle.com/datasets/asaniczka/software-engineer-job-postings-linkedin)
+
+2. **Run Data Processing**: Execute the notebook to process and combine the datasets:
+   ```bash
+   # Navigate to notebook directory and run the EDA notebook
+   jupyter notebook notebook/eda.ipynb
+   ```
+   Make sure to run all cells in the notebook to generate the `combined_jobs_dataset.csv` and `categories.json` files.
+
 ### Quick Start
 ```bash
-# Install system and load data
+# After completing prerequisites, install system and load data
 make install
 
 # Start all services
@@ -100,30 +117,6 @@ make logs          # Show logs from all services
 make status        # Check service status
 ```
 
-## 📊 Data Structure
-
-The project includes the following datasets from Kaggle:
-
-- **Data Analyst Jobs** - [Kaggle Dataset](https://www.kaggle.com/datasets/asaniczka/data-analyst-job-postings)
-  - File: `data_analyst_jobs.csv`
-  - Contains comprehensive data analyst job postings from LinkedIn
-
-- **Data Engineer Jobs** - [Kaggle Dataset](https://www.kaggle.com/datasets/asaniczka/linkedin-data-engineer-job-postings)
-  - File: `data_engineer_jobs.csv`
-  - LinkedIn data engineer job postings with detailed requirements
-
-- **Data Scientist Jobs** - [Kaggle Dataset](https://www.kaggle.com/datasets/asaniczka/data-scientist-linkedin-job-postings)
-  - File: `data_scientist.csv`
-  - Data scientist positions from LinkedIn with skill requirements
-
-- **Software Engineer Jobs** - [Kaggle Dataset](https://www.kaggle.com/datasets/asaniczka/software-engineer-job-postings-linkedin)
-  - File: `software_engineer_jobs.csv`
-  - Software engineering roles from LinkedIn
-
-- **Categories Configuration**
-  - File: `categories.json`
-  - Job categories and filter configurations
-
 ### Dataset Features
 Each dataset typically includes:
 - Job titles and descriptions
@@ -131,72 +124,6 @@ Each dataset typically includes:
 - Location and salary ranges
 - Required skills and experience levels
 - Application links and posting dates
-
-## 🔧 Development
-
-### Cloning the Project
-```bash
-git clone <repository-url>
-cd RoleRadar
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### Backend Development
-```bash
-cd superlinked_app
-pip install -r requirements.txt
-python api.py
-```
-
-## 📁 Project Structure
-
-```
-RoleRadar/
-├── data/                   # Data files
-├── frontend/              # Next.js frontend application
-│   ├── app/              # App router
-│   ├── components/       # React components
-│   └── types/           # TypeScript types
-├── superlinked_app/      # Python backend API
-├── notebook/            # Data analysis and EDA
-├── docker-compose.yml   # Docker services
-└── Makefile            # Automated commands
-```
-
-## 🚀 Future Enhancements
-
-RoleRadar is continuously evolving. Here are some exciting features planned for future releases:
-
-### 🎯 Personalized Search
-- **CV/Resume Upload**: Upload your resume and get personalized job recommendations based on your experience and skills
-- **Skill Gap Analysis**: Identify missing skills for desired positions and get learning recommendations
-- **Career Path Suggestions**: Get insights on potential career progression paths
-
-### 🤖 AI-Powered Features
-- **Interview Preparation**: AI-generated interview questions based on job requirements
-- **Salary Negotiation Insights**: Data-driven salary range suggestions
-- **Company Culture Matching**: Match personal preferences with company culture descriptions
-
-### 📊 Advanced Analytics
-- **Market Trends**: Job market trends and demand forecasting
-- **Skill Demand Analysis**: Most in-demand skills by location and role
-- **Application Tracking**: Track your job applications and success rates
-
-### 🔔 Smart Notifications
-- **Job Alerts**: Customizable notifications for new matching positions
-- **Application Deadlines**: Reminders for important application dates
-- **Market Updates**: Weekly insights on job market changes
-
-### 🌐 Enhanced Integration
-- **LinkedIn Integration**: Direct application through LinkedIn
-- **Calendar Integration**: Schedule interviews directly from the platform
-- **Portfolio Showcase**: Display your projects and achievements
 
 ## 🤝 Contributing
 
