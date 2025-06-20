@@ -32,19 +32,15 @@ export default function SearchSection({ query, setQuery, onSearch, isLoading, ha
       <div className="text-center mb-12">
         {/* Large RoleRadar Logo */}
           <div className="flex flex-col items-center mb-10">
-          <div className="w-48 h-48 flex items-center justify-center mb-6">
+          <div className="w-[32rem] h-72 flex items-center justify-center mb-6">
             <Image 
-              src="/roleradar_logo3.png" 
+              src="/roleradar_logo_main.png" 
               alt="RoleRadar Logo" 
-              width={192}
-              height={192}
+              width={512}
+              height={288}
               className="object-contain"
               priority
             />
-          </div>
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-gray-100 mb-3">RoleRadar</h1>
-            <p className="text-lg text-gray-400 mb-8">Spot your next role in a heartbeat</p>
           </div>
         </div>
         
@@ -68,7 +64,7 @@ export default function SearchSection({ query, setQuery, onSearch, isLoading, ha
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder="e.g., Data Analyst jobs in California with SQL and Python experience..."
+              placeholder="e.g., Data Analyst roles in New York with SQL experience..."
               className="w-full pl-12 pr-32 py-4 text-lg border border-gray-600 bg-gray-800 text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 shadow-sm placeholder-gray-400"
               disabled={isLoading}
               spellCheck={false}
