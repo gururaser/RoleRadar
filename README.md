@@ -268,15 +268,18 @@ docker compose -f docker-compose.gpu.yml exec superlinked nvidia-smi
 
 ### Switching Between CPU and GPU Mode
 ```bash
-# Stop current services
+# Simple mode switching (data is preserved)
 make stop
+make run-cpu   # Switch to CPU mode
+# OR
+make run-gpu   # Switch to GPU mode
 
-# Clean up containers
-make clean
-
-# Run installation again to choose different mode
-make install
+# Alternative: Use interactive selection
+make stop
+make run       # Will prompt you to choose mode
 ```
+
+**Note**: Your data is automatically preserved when switching between modes since both configurations use the same Qdrant volume.
 
 ### Port conflicts
 Check the port settings in the Docker Compose files and modify them if necessary.
