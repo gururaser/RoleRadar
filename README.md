@@ -12,6 +12,11 @@ RoleRadar allows job seekers to find the most relevant opportunities instantly b
 >
 > …into a precise blend of **structural filters** (location, salary, seniority) and **semantic similarity** across job descriptions, skill tags, and company culture notes.
 
+# Demo
+https://github.com/user-attachments/assets/4b88141d-50ff-430a-abe0-1b65e6a649ff
+
+
+
 ## 🚀 Features
 
 - **Natural Language Queries**: Describe job positions in everyday language
