@@ -95,10 +95,10 @@ export default function JobDetailsModal({ job, isOpen, onClose, onJobSelect, onS
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in-overlay"
       onClick={handleOverlayClick}
     >
-      <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto modal-content">
+      <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto modal-content animate-modal-in">
         {/* Modal Header */}
         <div className="flex justify-between items-start p-6 border-b border-gray-700">
           <div className="flex-1">
