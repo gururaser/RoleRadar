@@ -12,15 +12,14 @@ interface SearchSectionProps {
 
 export default function SearchSection({ query, setQuery, onSearch, isLoading, hasSearched, onQueryClear }: SearchSectionProps) {
   const exampleQueries = [
-    "Data Scientist jobs in San Francisco with Python and ML",
+    "Data Scientist jobs in Australia with Machine Learning skills",
     "Remote Software Engineer positions with React",
     "Data Analyst roles in New York with SQL experience",
-    "Senior Data Engineer jobs in Seattle"
   ]
 
   const handleQueryChange = (value: string) => {
     setQuery(value)
-    // Eğer metin boşsa ve daha önce arama yapılmışsa ana sayfaya dön
+    // Clear query if empty and hasSearched is true
     if (value === '' && hasSearched && onQueryClear) {
       onQueryClear()
     }
