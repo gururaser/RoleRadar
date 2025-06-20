@@ -20,15 +20,15 @@ services:
   # Superlinked Server
   superlinked:
     build:
-      context: .
+      context: ./superlinked_app
       dockerfile: Dockerfile
     container_name: roleradar_superlinked
     env_file:
-      - .env
+      - ./superlinked_app/.env
     ports:
       - "8080:8080"
     volumes:
-      - ../data:/app/data
+      - ./data:/app/data
     networks:
       - roleradar_network
     depends_on:
@@ -51,6 +51,35 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # Frontend Server
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: roleradar_frontend
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - roleradar_network
+    depends_on:
+      - superlinked
+    restart: unless-stopped
+    labels:
+      - "project=roleradar"
+      - "service=frontend"
+    # Wait for frontend service to be ready
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   roleradar_network:
