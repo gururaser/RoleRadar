@@ -117,7 +117,7 @@ export default function SearchSection({ query, setQuery, onSearch, isLoading, ha
               onFocus={() => setIsInputFocused(true)}
               onBlur={() => setIsInputFocused(false)}
               placeholder={isInputFocused || query.length > 0 ? 'Search for jobs...' : `e.g., ${placeholderText}${!isDeleting && currentCharIndex === placeholderTexts[currentTextIndex]?.length ? '|' : ''}`}
-              className="w-full pl-12 pr-32 py-4 text-lg border border-gray-600 bg-gray-800 text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 shadow-sm placeholder-gray-400"
+              className="w-full pl-12 pr-40 py-4 text-lg border border-gray-600 bg-gray-800 text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 shadow-sm placeholder-gray-400"
               disabled={isLoading}
               spellCheck={false}
               autoComplete="off"
