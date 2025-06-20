@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 
 interface SearchSectionProps {
   query: string
@@ -11,11 +12,61 @@ interface SearchSectionProps {
 }
 
 export default function SearchSection({ query, setQuery, onSearch, isLoading, hasSearched, onQueryClear }: SearchSectionProps) {
+  const [placeholderText, setPlaceholderText] = useState('')
+  const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [currentCharIndex, setCurrentCharIndex] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isInputFocused, setIsInputFocused] = useState(false)
+
+  const placeholderTexts = [
+    "Data Scientist jobs in Australia with Machine Learning skills",
+    "Remote Software Engineer positions with React",
+    "Data Analyst roles in New York with SQL experience",
+  ]
+
   const exampleQueries = [
     "Data Scientist jobs in Australia with Machine Learning skills",
     "Remote Software Engineer positions with React",
     "Data Analyst roles in New York with SQL experience",
   ]
+
+  useEffect(() => {
+    // Input focused or user started typing, stop animation
+    if (isInputFocused || query.length > 0) {
+      return
+    }
+
+    const typeSpeed = 100
+    const deleteSpeed = 50
+    const pauseDuration = 2000
+
+    const currentText = placeholderTexts[currentTextIndex]
+
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        // Writing mode
+        if (currentCharIndex < currentText.length) {
+          setPlaceholderText(currentText.substring(0, currentCharIndex + 1))
+          setCurrentCharIndex(prev => prev + 1)
+        } else {
+          // Text completed, switch to deleting mode
+          setTimeout(() => setIsDeleting(true), pauseDuration)
+        }
+      } else {
+        // Deleting mode
+        if (currentCharIndex > 0) {
+          setPlaceholderText(currentText.substring(0, currentCharIndex - 1))
+          setCurrentCharIndex(prev => prev - 1)
+        } else {
+          // Deleting completed, switch to next text
+          setIsDeleting(false)
+          setCurrentTextIndex(prev => (prev + 1) % placeholderTexts.length)
+        }
+      }
+    }, isDeleting ? deleteSpeed : typeSpeed)
+
+    return () => clearTimeout(timer)
+  }, [currentCharIndex, isDeleting, currentTextIndex, placeholderTexts, isInputFocused, query])
 
   const handleQueryChange = (value: string) => {
     setQuery(value)
@@ -63,7 +114,9 @@ export default function SearchSection({ query, setQuery, onSearch, isLoading, ha
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder="e.g., Data Analyst roles in New York with SQL experience..."
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
+              placeholder={isInputFocused || query.length > 0 ? 'Search for jobs...' : `e.g., ${placeholderText}${!isDeleting && currentCharIndex === placeholderTexts[currentTextIndex]?.length ? '|' : ''}`}
               className="w-full pl-12 pr-32 py-4 text-lg border border-gray-600 bg-gray-800 text-gray-100 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 shadow-sm placeholder-gray-400"
               disabled={isLoading}
               spellCheck={false}
