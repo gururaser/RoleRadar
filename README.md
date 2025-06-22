@@ -245,10 +245,6 @@ Please note the following limitations of the current demo version:
 4. Push your branch (`git push origin feature/AmazingFeature`)
 5. Create a Pull Request
 
-## 📄 License
-
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
-
 ## 🐛 Troubleshooting
 
 ### Services not starting
@@ -296,3 +292,6 @@ make run       # Will prompt you to choose mode
 ### Port conflicts
 Check the port settings in the Docker Compose files and modify them if necessary.
 
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
