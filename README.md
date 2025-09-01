@@ -12,6 +12,13 @@ RoleRadar allows job seekers to find the most relevant opportunities instantly b
 >
 > …into a precise blend of **structural filters** (location, salary, seniority) and **semantic similarity** across job descriptions, skill tags, and company culture notes.
 
+
+> ⚠️ **Disclaimer**  
+> This project is not affiliated with any other application, website, or repository that shares the name “RoleRadar”.  
+> It is an independent, open-source project developed solely for learning and experience-building purposes.  
+> The goal is to explore and demonstrate semantic job search using technologies like Superlinked and Qdrant.
+
+
 # Demo
 https://github.com/user-attachments/assets/4b88141d-50ff-430a-abe0-1b65e6a649ff
 
@@ -238,10 +245,6 @@ Please note the following limitations of the current demo version:
 4. Push your branch (`git push origin feature/AmazingFeature`)
 5. Create a Pull Request
 
-## 📄 License
-
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
-
 ## 🐛 Troubleshooting
 
 ### Services not starting
@@ -289,3 +292,6 @@ make run       # Will prompt you to choose mode
 ### Port conflicts
 Check the port settings in the Docker Compose files and modify them if necessary.
 
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

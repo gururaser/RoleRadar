@@ -15,8 +15,7 @@ def load_categories():
 categories = load_categories()
 
 
-@sl.schema
-class JobPosting:
+class JobPosting(sl.Schema):
     # `id` is obligatory field - using job_link as unique identifier
     id: sl.IdField
     

@@ -191,10 +191,8 @@ stop-frontend:
 # Clean up - stop services and remove containers/volumes
 clean:
 	@echo "🧹 Cleaning up RoleRadar environment..."
-	@docker compose -f docker-compose.cpu.yml down -v --remove-orphans 2>/dev/null || true
-	@docker compose -f docker-compose.gpu.yml down -v --remove-orphans 2>/dev/null || true
-	@echo "🗑️  Removing unused Docker resources..."
-	@docker system prune -f
+	@docker compose -f docker-compose.cpu.yml down -v --remove-orphans --rmi local 2>/dev/null || true
+	@docker compose -f docker-compose.gpu.yml down -v --remove-orphans --rmi local 2>/dev/null || true
 	@echo "✅ Cleanup completed successfully!"
 
 # Show logs from all services

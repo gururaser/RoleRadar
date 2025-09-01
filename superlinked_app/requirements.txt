@@ -1,2 +1,2 @@
-superlinked
-superlinked-server
+superlinked==36.3.1
+superlinked-server==1.53.1
