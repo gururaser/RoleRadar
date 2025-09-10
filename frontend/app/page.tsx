@@ -56,6 +56,12 @@ export default function HomePage() {
       const data: SearchResponse = await response.json()
       setResults(data.entries)
       setSearchResponse(data)
+
+      // Log detected filters to console
+      if (data.metadata?.search_params) {
+        console.log('Detected Search Filters:', data.metadata.search_params)
+        console.log('Original Query:', query)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setResults([])
